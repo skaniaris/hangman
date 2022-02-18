@@ -1,15 +1,56 @@
+require "yaml"
+
+module Serializable
+
+    def save_game
+
+        puts "Would you like to save and quit the game? y/n"
+        answer = gets.chomp.downcase 
+
+        if answer == "y" 
+            files = File.open("saved.yml", "w") do |file| YAML.dump([] << self, file)
+            exit 
+            end 
+        end 
+    end 
+
+    def load_game
+        yaml = YAML.load_file("saved.yml")
+        self.display_word = yaml[0].display_word
+        self.guess_word = yaml[0].guess_word
+        self.@hidden_display = yaml[0].@hidden_display
+    end 
+end 
+
+
 class Hangman
+
+    include Serializable
+
     def initialize
 
+        @hidden_display = Array.new 
+        @letter_guess = ""
+        @wrong_letters = ""
         @computer_word = ""
         @display_guess = Array.new
         @number_of_guesses = 6 
         puts "HANGMAN"
-        select_word
+        puts "Would you like to load the game? y/n"
+        answer = gets.chomp.downcase
+        p answer 
+        if answer == "y"
+            p "loading game"
+            load_game
+        end 
+        if answer == "n"
+            p "answer is n"
+            select_word
+        end   
     end  
 
     def select_word
-
+        p "selecting word"
         dictionary = File.open("google-10000-english-no-swears.txt")
         @computer_word = dictionary.readlines.sample.chomp
 
@@ -29,7 +70,7 @@ class Hangman
     end 
 
     def display_word 
-
+        p @display_guess
         i = 0 
         while i < @display_guess.length
             print " _ "
@@ -41,8 +82,8 @@ class Hangman
     
     def guess_word
 
-        hidden_display = Array.new(@display_guess.length, "_")
-        letter_guess = ""
+        @hidden_display = Array.new(@display_guess.length, "_")
+        correct = false 
         i = 0 
 
         while i <= @number_of_guesses
@@ -51,27 +92,31 @@ class Hangman
                 replay_game
                 return
             end 
+
+            save_game 
+
             puts "You have #{@number_of_guesses} guesses." 
-            letter_guess = gets.chomp
+            @letter_guess = gets.chomp
 
             @display_guess.each_with_index do |letter, index|
-                if letter_guess == letter 
-                    hidden_display[index] = letter_guess
+                if @letter_guess == letter 
+                    @hidden_display[index] = @letter_guess
                 end 
                 
-                if hidden_display == @display_guess
+                if @hidden_display == @display_guess
                     p "You win!"
                     replay_game
                     return
                 end 
-            end 
-
-                if !(@display_guess.include?(letter_guess)) 
-                    p "That guess is incorrect!"
-                    puts "\n"
-                    @number_of_guesses = @number_of_guesses - 1  
+            end  
+                
+                if !(@display_guess.include?(@letter_guess)) 
+                    @wrong_letters = @wrong_letters + @letter_guess
+                    @number_of_guesses = @number_of_guesses - 1      
                 end
-                p hidden_display
+
+                p "incorrect letters: #{@wrong_letters}"
+                p @hidden_display
                 puts "\n"
         end 
     end 
@@ -92,4 +137,4 @@ class Hangman
     end 
 end 
 
-game = Hangman.new 
+game = Hangman.new

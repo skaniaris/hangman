@@ -1,0 +1,24 @@
+---
+- !ruby/object:Hangman
+  hidden_display:
+  - s
+  - y
+  - m
+  - _
+  - _
+  - _
+  - m
+  - s
+  letter_guess: m
+  wrong_letters: ''
+  computer_word: symptoms
+  display_guess:
+  - s
+  - y
+  - m
+  - p
+  - t
+  - o
+  - m
+  - s
+  number_of_guesses: 6
